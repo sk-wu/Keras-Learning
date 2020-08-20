@@ -2,8 +2,8 @@
 
 import os
 
-for file in os.listdir("./data/train/images"):
-    file_name = os.path.join("./data/train/images", file)
+for file in os.listdir("./data/location/images"):
+    file_name = os.path.join("./data/location/images", file)
     file_label = file_name.replace("images", "labels").replace("jpg", "json")
     print(file_name)
     print(file_label)

@@ -1,5 +1,4 @@
-# 在原图上检验模型效果，一张一张显示图片
-# 首先判断是否异常，如果异常则发出警报，否则执行坐标预测
+
 
 import os
 import cv2
@@ -7,12 +6,14 @@ import keras
 import numpy as np
 import time
 
-loc_model_path = './models/loc_model/loc_model_15.h5'
-classify_model_path = './models/classify_model/classify_model_6.h5'
-test_img_path = './data/test/test2'
+loc_model_path = './models/loc_model/loc_model_20.h5'  # 检测模型
+classify_model_path = './models/classify_model/classify_model_10.h5'  # 分类模型
+test_img_path = './data/test/test2'  # 测试图片地址
+output_path = "./results_on_src_imgs_0"  # 测试图片输出地址
 width = 240
 height = 27
 channels_num = 3
+
 
 def preprocess(src_img):
     norm_img = src_img / 255
@@ -31,6 +32,7 @@ def test():
     for file in os.listdir(test_img_path):
         start = time.time()
         img = cv2.imread(os.path.join(test_img_path, file))
+        img = cv2.resize(img, (1920, 1080))
         print(file)
         h, w = img.shape[:2]
         cut_img = img[int(0.8 * h):, :]
@@ -48,10 +50,6 @@ def test():
             cv2.line(img, (int(result[0][0] * 8), int(0.8 * h)), (int(result[0][3] * 8), h), (0, 0, 255), 6)
             cv2.line(img, (int(result[0][1] * 8), int(0.8 * h)), (int(result[0][2] * 8), h), (0, 0, 255), 6)
             print(time.time()-start)
-            cv2.namedWindow("ttt", cv2.WINDOW_NORMAL)
-            cv2.imshow("ttt", img)
-            # cv2.imwrite("k.jpg", img)
-            cv2.waitKey()
 
         else:
             text = "Warning!"
@@ -59,10 +57,6 @@ def test():
             x = w//2 - textSize[0][0]//2
             y = h//2 - textSize[0][1]//2
             cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 0, 255), 2)
-            cv2.namedWindow("ttt", cv2.WINDOW_NORMAL)
-            cv2.imshow("ttt", img)
-            cv2.imwrite("t.jpg", img)
-            cv2.waitKey()
-
+        cv2.imwrite(os.path.join(output_path, file), img)
 
 test()

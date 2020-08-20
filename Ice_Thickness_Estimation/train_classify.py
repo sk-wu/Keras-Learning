@@ -2,6 +2,7 @@
 
 import keras
 from networks import WarningNet
+from keras.models import load_model
 
 
 num_classes = 2
@@ -16,7 +17,7 @@ channels_num = 3
 def train():
     train_datagen = keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)
     train_generator = train_datagen.flow_from_directory(train_data_dir,
-                                                        target_size=(input_height, input_width),
+                                                        target_size=(input_height, input_width),  # 目标大小（target_size）：整数的元组（高度、宽度）
                                                         batch_size=32,
                                                         shuffle=True,
                                                         class_mode='categorical')
@@ -27,8 +28,16 @@ def train():
                                                                   batch_size=24,
                                                                   class_mode='categorical')
 
-    loc_object = WarningNet.WarningNet(input_width, input_height, channels_num)
-    loc_model = loc_object.build_classification_model()
+    # 新建模型
+    # loc_object = WarningNet.WarningNet(input_width, input_height, channels_num)
+    # loc_model = loc_object.build_classification_model()
+
+    # 载入预训练模型
+    loc_model = load_model('./models/classify_model/pretrained_classify_model.h5')
+    print(loc_model.summary)
+
+
+
     # 编译与训练
     adam = keras.optimizers.Adam(lr=0.001)
     loc_model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
