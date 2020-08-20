@@ -2,7 +2,8 @@
 
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.models import Sequential
-
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 class WarningNet(object):
     def __init__(self, width, height, channels_num):
@@ -13,7 +14,7 @@ class WarningNet(object):
     def build_classification_model(self):
         model = Sequential()
         model.add(Conv2D(filters=32, kernel_size=(3, 3), input_shape=(self.height, self.width, self.channels_num),
-                         activation='relu'))
+                         activation='relu'))  # 当通道数在最后时，input_shape对应为:(batch, rows, cols, channels)
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))

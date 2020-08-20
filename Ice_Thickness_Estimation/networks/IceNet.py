@@ -1,12 +1,16 @@
 # 定位网络
 
+import keras
 from keras.models import Model
-from keras.layers import Dense, Dropout, Flatten, Conv2D, Input, AveragePooling2D, concatenate, MaxPooling2D
+from keras.layers import Dense, Dropout, Flatten, Conv2D, Input, AveragePooling2D, concatenate, MaxPooling2D, GlobalAveragePooling2D
 from keras.models import Sequential
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
-class IceNet(object):
+class IceNet():
     def __init__(self, width, height, channels_num):
+        super(IceNet, self).__init__()
         self.width = width
         self.height = height
         self.channels_num = channels_num
@@ -82,6 +86,45 @@ class IceNet(object):
         model.summary()
         return model
 
+    def build_resnet50(self):
+        input = Input(shape=(self.height, self.width, self.channels_num))
+        res_model = keras.applications.ResNet50(include_top=True, weights='imagenet', input_tensor=input)
+        # res_model.summary()
+        layer_dict = dict([(layer.name, layer) for layer in res_model.layers])
+        # print(layer_dict)
+        x = layer_dict['avg_pool'].output
+        output = Dense(4, name="last")(x)
+        model = Model(inputs=input, outputs=output)
+        model.summary()
+        for layer in model.layers[:100]:
+            layer.trainable = False
+        return model
 
-obj = IceNet(240, 27, 3)
-obj.build_squeezenet_model()
+
+    def build_simple_model(self):
+        input = Input(shape=(self.height, self.width, self.channels_num))
+        res_model = keras.applications.ResNet50(include_top=True, weights='imagenet', input_tensor=input)
+        # res_model.summary()
+        layer_dict = dict([(layer.name, layer) for layer in res_model.layers])
+        # print(layer_dict)
+        x = layer_dict['activation_11'].output
+        x = GlobalAveragePooling2D()(x)
+        output = Dense(4, name="last")(x)
+        model = Model(inputs=input, outputs=output)
+        model.summary()
+        for layer in model.layers[:]:
+            layer.trainable = True
+        return model
+
+
+
+# obj = IceNet(240, 27, 3)
+# obj.buld_resnet50()
+# input = Input(shape=(240, 27, 3))
+# res_model = keras.applications.ResNet50(include_top=True, weights='imagenet', input_tensor=input)
+# # res_model = keras.applications.ResNet50(include_top=True, weights='imagenet')
+# res_model.summary()
+
+# input = Input(shape=(240, 240, 3))
+# vgg_model = keras.applications.VGG16(include_top=True, weights='imagenet', input_tensor=input)
+# vgg_model.sumary()
